@@ -53,6 +53,11 @@ func main() {
 		msgId := update.Message.MessageID
 		chatId := update.Message.Chat.ID
 
+		// ignore all replies
+		if update.Message.ReplyToMessage != nil {
+			continue
+		}
+
 		if !update.Message.IsCommand() {
 			msgText := update.Message.Text
 			parts := strings.Split(msgText, " ")
