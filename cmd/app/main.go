@@ -5,9 +5,11 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
 	"github.com/kn9ka/fundbot-go/services/alphaVantage"
+	"github.com/kn9ka/fundbot-go/services/contact"
 	"github.com/kn9ka/fundbot-go/services/corona"
 	"github.com/kn9ka/fundbot-go/services/sheets"
 	"github.com/kn9ka/fundbot-go/services/unistream"
+	"github.com/kn9ka/fundbot-go/services/utils"
 	"log"
 	"os"
 	"strconv"
@@ -117,6 +119,7 @@ func main() {
 			officialRates := alphaVantage.GetRates()
 			unistreamRates := unistream.GetRates()
 			coronaRates := corona.GetRates()
+			contactRates := contact.GetRates()
 
 			msg.ParseMode = "HTML"
 			msg.Text = ""
@@ -125,15 +128,34 @@ func main() {
 				msg.Text += fmt.Sprintf("<b>[%s]</b>\n", currency)
 
 				if officialRate, ok := officialRates[currency]; ok {
-					msg.Text += fmt.Sprintf("  official rate: %s\n", officialRate)
+					msg.Text += fmt.Sprintf("  official rate: %s\n", utils.ConvertRate(officialRate))
 				}
 
 				if unistreamRate, ok := unistreamRates[currency]; ok {
-					msg.Text += fmt.Sprintf("  unistream: %s\n", unistreamRate)
+					msg.Text += fmt.Sprintf(
+						"  <a href='%s'>%s</a>: %s\n",
+						unistream.SiteUrl,
+						unistream.Name,
+						utils.ConvertRate(unistreamRate),
+					)
 				}
 
 				if coronaRate, ok := coronaRates[currency]; ok {
-					msg.Text += fmt.Sprintf("  corona: %s\n", coronaRate)
+					msg.Text += fmt.Sprintf(
+						"  <a href='%s'>%s</a>: %s\n",
+						corona.SiteUrl,
+						corona.Name,
+						utils.ConvertRate(coronaRate),
+					)
+				}
+
+				if contactRate, ok := contactRates[currency]; ok {
+					msg.Text += fmt.Sprintf(
+						"  <a href='%s'>%s</a>: %s\n",
+						contact.SiteUrl,
+						contact.Name,
+						utils.ConvertRate(contactRate),
+					)
 				}
 
 				msg.Text += "\n"
@@ -149,6 +171,10 @@ func main() {
 
 			msg.ParseMode = "HTML"
 			msg.Text = str
+
+		default:
+			msg.ParseMode = "HTML"
+			msg.Text = "Unknown command, bro"
 		}
 
 		if _, err := bot.Send(msg); err != nil {

@@ -10,10 +10,12 @@ import (
 )
 
 const (
-	RUB    string = "810"
-	USD    string = "840"
-	GEL    string = "981"
-	ApiUrl string = "https://koronapay.com/transfers/online/api/transfers/tariffs"
+	RUB     string = "810"
+	USD     string = "840"
+	GEL     string = "981"
+	ApiUrl  string = "https://koronapay.com/transfers/online/api/transfers/tariffs"
+	SiteUrl string = "https://koronapay.com/"
+	Name    string = "Золотая корона"
 )
 
 type ResponseBody struct {

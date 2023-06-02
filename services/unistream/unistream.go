@@ -11,11 +11,13 @@ import (
 )
 
 const (
-	RUB    string = "RUB"
-	USD    string = "USD"
-	GEL    string = "GEL"
-	EUR    string = "EUR"
-	ApiUrl        = "https://api6.unistream.com/api/v1/transfer/calculate"
+	RUB     string = "RUB"
+	USD     string = "USD"
+	GEL     string = "GEL"
+	EUR     string = "EUR"
+	ApiUrl  string = "https://api6.unistream.com/api/v1/transfer/calculate"
+	SiteUrl string = "https://unistream.ru/"
+	Name    string = "Юнистрим"
 )
 
 type ResponseBody struct {
