@@ -9,7 +9,7 @@ func ConvertRate(rate string) string {
 	// Преобразование строки в число с плавающей точкой
 	num, err := strconv.ParseFloat(rate, 64)
 	if err != nil {
-		fmt.Println("Failed to parse float:", err)
+		fmt.Printf("Failed to parse float: %s, while parsing: %s", err, rate)
 		return rate
 	}
 

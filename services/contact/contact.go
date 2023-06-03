@@ -61,60 +61,12 @@ func getFetchClient() *FetchClient {
 		}
 	}
 	if instance.Token == "" {
-		instance.GetAccessToken()
+		instance.InitAccessToken()
 	}
 	return instance
 }
 
-func (fc *FetchClient) SetHeaders(req *http.Request) {
-	req.Header.Set("content-type", "application/json")
-	if fc.Token != "" {
-		req.Header.Set("Authorization", "SplitTokenV2 "+fc.Token)
-	}
-	if fc.Cookies.Refresh != "" {
-		req.AddCookie(&http.Cookie{Name: "tokenTailRefresh2", Value: fc.Cookies.Refresh})
-	}
-	if fc.Cookies.Access != "" {
-		req.AddCookie(&http.Cookie{Name: "tokenTailAccess2", Value: fc.Cookies.Access})
-	}
-}
-
-func (fc *FetchClient) DoRequest(method, url string, body io.Reader) (*http.Response, error) {
-	req, err := http.NewRequest(method, url, body)
-	if err != nil {
-		return nil, err
-	}
-
-	fc.SetHeaders(req)
-
-	resp, err := fc.Client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	cookies := resp.Header.Values("Set-Cookie")
-	for _, cookieString := range cookies {
-		cookieParts := strings.SplitN(cookieString, "=", 2)
-		if len(cookieParts) != 2 {
-			return nil, fmt.Errorf("wrong format for cookie: %s", cookieString)
-		}
-
-		cookieName := strings.TrimSpace(cookieParts[0])
-		cookieValue := strings.TrimSpace(cookieParts[1])
-		cookieParams := strings.SplitN(cookieValue, ";", 2)
-
-		if cookieName == "tokenTailRefresh2" {
-			fc.Cookies.Refresh = strings.TrimSpace(cookieParams[0])
-		}
-		if cookieName == "tokenTailAccess2" {
-			fc.Cookies.Access = strings.TrimSpace(cookieParams[0])
-		}
-	}
-
-	return resp, nil
-}
-
-func (fc *FetchClient) GetAccessToken() {
+func (fc *FetchClient) InitAccessToken() {
 	if fc.Token != "" {
 		return
 	}
@@ -128,7 +80,6 @@ func (fc *FetchClient) GetAccessToken() {
 		GrantType: "anonymous",
 		Ticket:    "D5267BED-18CC-4661-B03A-65934CAE1CA4",
 	}
-	// Преобразуем данные в формат JSON
 	payload, err := json.Marshal(data)
 	if err != nil {
 		fmt.Printf("failed to marshal JSON: %s\n", err)
@@ -183,6 +134,54 @@ func (fc *FetchClient) GetAccessToken() {
 	}
 
 	fc.Token = token
+}
+
+func (fc *FetchClient) SetHeaders(req *http.Request) {
+	req.Header.Set("content-type", "application/json")
+	if fc.Token != "" {
+		req.Header.Set("Authorization", "SplitTokenV2 "+fc.Token)
+	}
+	if fc.Cookies.Refresh != "" {
+		req.AddCookie(&http.Cookie{Name: "tokenTailRefresh2", Value: fc.Cookies.Refresh})
+	}
+	if fc.Cookies.Access != "" {
+		req.AddCookie(&http.Cookie{Name: "tokenTailAccess2", Value: fc.Cookies.Access})
+	}
+}
+
+func (fc *FetchClient) DoRequest(method, url string, body io.Reader) (*http.Response, error) {
+	req, err := http.NewRequest(method, url, body)
+	if err != nil {
+		return nil, err
+	}
+
+	fc.SetHeaders(req)
+
+	resp, err := fc.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	cookies := resp.Header.Values("Set-Cookie")
+	for _, cookieString := range cookies {
+		cookieParts := strings.SplitN(cookieString, "=", 2)
+		if len(cookieParts) != 2 {
+			return nil, fmt.Errorf("wrong format for cookie: %s", cookieString)
+		}
+
+		cookieName := strings.TrimSpace(cookieParts[0])
+		cookieValue := strings.TrimSpace(cookieParts[1])
+		cookieParams := strings.SplitN(cookieValue, ";", 2)
+
+		if cookieName == "tokenTailRefresh2" {
+			fc.Cookies.Refresh = strings.TrimSpace(cookieParams[0])
+		}
+		if cookieName == "tokenTailAccess2" {
+			fc.Cookies.Access = strings.TrimSpace(cookieParams[0])
+		}
+	}
+
+	return resp, nil
 }
 
 func createExchangeForm() (string, error) {

@@ -166,7 +166,7 @@ func main() {
 			str := "Ничего не найдено"
 
 			for _, row := range exp {
-				str = fmt.Sprintf("<b>@%s</b>: ", row.Name) + fmt.Sprintf("%.2f \n", row.Total)
+				str = fmt.Sprintf("<b>@%s</b>: %.2f \n", row.Name, row.Total)
 			}
 
 			msg.ParseMode = "HTML"
