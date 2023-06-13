@@ -28,7 +28,7 @@ func initialize(path string) {
 }
 
 func main() {
-	initialize(".env")
+	initialize(".env-dev")
 	tgApiKey := os.Getenv("BOT_TOKEN")
 	sheetsClient := sheets.NewService()
 

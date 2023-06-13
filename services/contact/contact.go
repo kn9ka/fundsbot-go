@@ -61,16 +61,12 @@ func getFetchClient() *FetchClient {
 		}
 	}
 	if instance.Token == "" {
-		instance.InitAccessToken()
+		instance.RefreshAccessToken()
 	}
 	return instance
 }
 
-func (fc *FetchClient) InitAccessToken() {
-	if fc.Token != "" {
-		return
-	}
-
+func (fc *FetchClient) RefreshAccessToken() {
 	data := struct {
 		TokenType string `json:"tokenType"`
 		GrantType string `json:"grantType"`
@@ -243,6 +239,9 @@ func updateForm(formId string, outCurrency string) (bool, error) {
 }
 
 func getRate(outCurrency string) (string, error) {
+	client := getFetchClient()
+	client.RefreshAccessToken()
+
 	formId, err := createExchangeForm()
 	_, err = updateForm(formId, outCurrency)
 	if err != nil {
@@ -250,7 +249,6 @@ func getRate(outCurrency string) (string, error) {
 	}
 
 	url := fmt.Sprintf("%s/trns/%s/fees", ApiUrl, formId)
-	client := getFetchClient()
 
 	resp, err := client.DoRequest("POST", url, nil)
 	if err != nil {
